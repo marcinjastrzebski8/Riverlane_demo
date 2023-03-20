@@ -66,9 +66,6 @@ class Stabiliser():
         c_gate = gate.control()
         return c_gate
 
-class Entangled_System():
-    def __init__(self):
-        pass
 
 class L_qubit():
     """
@@ -108,21 +105,9 @@ class L_qubit():
         merged_circuit.compose(self.lq_circ, qubits = [k for k in range(self.nq+self.ns)], 
                                clbits = [k for k in range(self.ns)], inplace=True)
         merged_circuit.compose(other.lq_circ, qubits = [k for k in range(self.nq+self.ns, 2*(self.nq+self.ns))], inplace=True)
-        
-        #perform merging by measuring merging stabilisers - pseudocode atm
-        #merging stabiliser 1
-        #SM1(merged_circuit)
-        #merging stabiliser 2
-        #SM2(merged_circuit)
-        #merged_circuit.measure()
-
+    
 
         merged_L_qubit = L_qubit(merged_circuit)
         return merged_L_qubit
 
-    def split(self):
-        """
-        return: instance of Entangled_System
-        """
-        pass
 
