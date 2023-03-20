@@ -43,7 +43,6 @@ def measure_stabiliser(stabiliser, circuit, meas_qubit_id, meas_clbit_id):
     circuit.h(meas_qubit_id)
     #needs to be cast to a list from np array otherwise throws error in .append()
     list_for_gate = list(np.concatenate([[meas_qubit_id], stabiliser.qubit_list]))
-    print(list_for_gate)
     circuit.append(stabiliser.gate(), list_for_gate)
     circuit.h(meas_qubit_id)
     if stabiliser.pauli.lower() == 'z':
@@ -75,11 +74,13 @@ class L_qubit():
     """
     Can create circuits representing logical qubits.
     """
-    def __init__(self, circ = None):
+    def __init__(self, circ = None, nq = num_qubits , ns = num_stabilisers):
+        self.nq = nq
+        self.ns = ns
         if circ is None:
-            code_qubits = QuantumRegister(num_qubits, 'code_q')
-            meas_qubits = QuantumRegister(num_stabilisers, 'aux_q')
-            meas_clbits = ClassicalRegister(num_stabilisers, 'classical')
+            code_qubits = QuantumRegister(nq, 'code_q')
+            meas_qubits = QuantumRegister(ns, 'aux_q')
+            meas_clbits = ClassicalRegister(ns, 'classical')
             self.lq_circ = QuantumCircuit(code_qubits, meas_qubits, meas_clbits)
             #initialises in logical 0 state
             #NOTE: might not be optimal way of initialising this state
@@ -102,10 +103,11 @@ class L_qubit():
 
         return: instance of L_qubit
         """
-        merged_circuit = QuantumCircuit(QuantumRegister(2*num_qubits), ClassicalRegister(2))
+        merged_circuit = QuantumCircuit(QuantumRegister(2*(self.nq+self.ns)), ClassicalRegister(2*self.ns))
         #make a circuit containing two logical qubits
-        merged_circuit.compose(self.lq_circ, qubits = [k for k in range(num_qubits)], inplace=True)
-        merged_circuit.compose(other.lq_circ, qubits = [k for k in range(num_qubits, 2*num_qubits)], inplace=True)
+        merged_circuit.compose(self.lq_circ, qubits = [k for k in range(self.nq+self.ns)], 
+                               clbits = [k for k in range(self.ns)], inplace=True)
+        merged_circuit.compose(other.lq_circ, qubits = [k for k in range(self.nq+self.ns, 2*(self.nq+self.ns))], inplace=True)
         
         #perform merging by measuring merging stabilisers - pseudocode atm
         #merging stabiliser 1
